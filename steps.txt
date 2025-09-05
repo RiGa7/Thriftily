@@ -1,0 +1,10 @@
+1. created folders backend and fronted
+2. install express dotenv cors helmet morgan @neondatabase/serverless in root folder 
+3. create server.js in backend folder
+4. in package.json   "main": "backend/server.js", and   "type": "module"
+
+5. npm i nodemon -D
+6. instead of nodemon backend/server.js (in terminal) change scripts in package.json --> 
+  "scripts": {
+    "dev": "nodemon backend/server.js"
+  },
