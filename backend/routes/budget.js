@@ -1,18 +1,11 @@
 import express from "express";
+import { getBudgets, createBudget, updateBudget, deleteBudget } from "../controllers/budgetController.js";
 
 const router = express.Router();
 
-router.get("/", (req,res)=>{
-    res.send("Get all Budgets");
-});
-
-router.post("/", (req,res)=>{
-});
-
-router.put("/:id", (req,res)=>{
-});
-
-router.delete("/:id", (req,res)=>{
-});
+router.get("/", getBudgets);
+router.post("/", createBudget);
+router.put("/:id", updateBudget);
+router.delete("/:id", deleteBudget);
 
 export default router;
