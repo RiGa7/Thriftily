@@ -1,37 +1,49 @@
-import db from "../config/db.js";
+import {sql} from "../config/db.js";
+
+export const createBudget = async (req, res) => {
+  const { month, income, budget_amount, rules_json } = req.body;
+  try {
+    const result = await sql`
+      INSERT INTO budgets (user_id, month, income, budget_amount, rules_json)
+      VALUES (${req.user.id}, ${month}, ${income}, ${budget_amount}, ${rules_json})
+      RETURNING *;
+    `;
+    res.status(201).json(result[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
 
 export const getBudgets = async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM budgets WHERE user_id=$1", [req.user.id]);
-    res.json(result.rows);
+    const result = await sql`
+      SELECT * FROM budgets WHERE user_id = ${req.user.id} ORDER BY month DESC;
+    `;
+    res.json(result);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
 
-export const createBudget = async (req, res) => {
-  const { category, amount } = req.body;
-  try {
-    const result = await db.query(
-      "INSERT INTO budgets (user_id, category, amount) VALUES ($1, $2, $3) RETURNING *",
-      [req.user.id, category, amount]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
 
 export const updateBudget = async (req, res) => {
   const { id } = req.params;
-  const { category, amount } = req.body;
+  const { month, income, budget_amount, rules_json } = req.body;
   try {
-    const result = await db.query(
-      "UPDATE budgets SET category=$1, amount=$2 WHERE id=$3 AND user_id=$4 RETURNING *",
-      [category, amount, id, req.user.id]
-    );
-    res.json(result.rows[0]);
+    const result = await sql`
+      UPDATE budgets
+      SET month = ${month}, income = ${income}, budget_amount = ${budget_amount}, rules_json = ${rules_json}
+      WHERE id = ${id} AND user_id = ${req.user.id}
+      RETURNING *;
+    `;
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Budget not found or unauthorized" });
+    }
+    res.json(result[0]);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -39,9 +51,15 @@ export const updateBudget = async (req, res) => {
 export const deleteBudget = async (req, res) => {
   const { id } = req.params;
   try {
-    await db.query("DELETE FROM budgets WHERE id=$1 AND user_id=$2", [id, req.user.id]);
-    res.json({ message: "Budget deleted" });
+    const result = await sql`
+      DELETE FROM budgets WHERE id = ${id} AND user_id = ${req.user.id} RETURNING *;
+    `;
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Budget not found or unauthorized" });
+    }
+    res.json({ message: "Budget deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };

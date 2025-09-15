@@ -19,5 +19,5 @@ build/
 .vscode/
 .idea/
 
-# Database/excel files (optional, if not needed in repo)
-thriftly.xlsx
+#notes
+*.txt

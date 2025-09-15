@@ -8,6 +8,7 @@ import userRoutes from "./routes/user.js";
 import budgetRoutes from "./routes/budget.js";
 import expenseRoutes from "./routes/expense.js";
 import { sql } from "./config/db.js";
+import { authMiddleware } from "./middlewares/authMiddleware.js";
 
 dotenv.config();
 
@@ -28,8 +29,8 @@ app.use(morgan("dev"));//Logging- Shows request details in terminal for debuggin
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/budget', budgetRoutes);
-app.use('/api/expense', expenseRoutes);
+app.use('/api/budget', authMiddleware, budgetRoutes);
+app.use('/api/expense', authMiddleware, expenseRoutes);
 
 async function initDB() {
   try {
@@ -40,11 +41,21 @@ async function initDB() {
         username VARCHAR(100) UNIQUE NOT NULL,
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
-
+    // Budgets table
+    await sql`
+      CREATE TABLE IF NOT EXISTS budgets (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        month DATE NOT NULL,
+        income DECIMAL(10, 2) NOT NULL,
+        budget_amount DECIMAL(10, 2) NOT NULL,
+        rules_json JSONB
+      );
+    `;
     // Income table
     await sql`
       CREATE TABLE IF NOT EXISTS income (
@@ -66,18 +77,6 @@ async function initDB() {
         category VARCHAR(50) NOT NULL,
         date DATE NOT NULL,
         note TEXT
-      );
-    `;
-
-    // Budgets table
-    await sql`
-      CREATE TABLE IF NOT EXISTS budgets (
-        id SERIAL PRIMARY KEY,
-        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        month DATE NOT NULL,
-        income DECIMAL(10, 2) NOT NULL,
-        budget_amount DECIMAL(10, 2) NOT NULL,
-        rules_json JSONB
       );
     `;
 
