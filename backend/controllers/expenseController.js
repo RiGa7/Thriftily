@@ -1,35 +1,47 @@
+import { sql } from "../config/db.js";
+
+// GET all expenses for a budget
 export const getExpenses = async (req, res) => {
+  const { budgetId } = req.params;
+
   try {
-    // TODO: Fetch all expenses
-    res.send("Get all expenses controller");
+    const expenses = await sql`
+      SELECT * FROM expenses WHERE budget_id = ${budgetId};
+    `;
+    res.json(expenses);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in getExpenses:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
+// CREATE expense
 export const createExpense = async (req, res) => {
+  const { budgetId } = req.params;
+  const { title, amount } = req.body;
+
   try {
-    // TODO: Insert new expense
-    res.send("Create expense controller");
+    const result = await sql`
+      INSERT INTO expenses (budget_id, title, amount)
+      VALUES (${budgetId}, ${title}, ${amount})
+      RETURNING *;
+    `;
+    res.status(201).json(result[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in createExpense:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
-export const updateExpense = async (req, res) => {
-  try {
-    // TODO: Update expense by ID
-    res.send("Update expense controller");
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
+// DELETE expense
 export const deleteExpense = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    // TODO: Delete expense by ID
-    res.send("Delete expense controller");
+    await sql`DELETE FROM expenses WHERE id = ${id};`;
+    res.json({ message: "Expense deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in deleteExpense:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
