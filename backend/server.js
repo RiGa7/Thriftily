@@ -24,9 +24,8 @@ app.get("/test", (req, res) => {
 
 app.use(cors());
 app.use(express.json());
-app.use(helmet());// helmet	- Security -	Sets secure HTTP headers to protect your app
-app.use(morgan("dev"));//Logging- Shows request details in terminal for debugging
-
+app.use(helmet()); // helmet	- Security -	Sets secure HTTP headers to protect your app
+app.use(morgan("dev")); //Logging- Shows request details in terminal for debugging
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/budget', authMiddleware, budgetRoutes);
@@ -56,6 +55,7 @@ async function initDB() {
         rules_json JSONB
       );
     `;
+
     // Income table
     await sql`
       CREATE TABLE IF NOT EXISTS income (
@@ -73,9 +73,11 @@ async function initDB() {
       CREATE TABLE IF NOT EXISTS expenses (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        budget_id INT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
+        title VARCHAR(100) NOT NULL,
         amount DECIMAL(10, 2) NOT NULL,
         category VARCHAR(50) NOT NULL,
-        date DATE NOT NULL,
+        date DATE NOT NULL DEFAULT CURRENT_DATE,
         note TEXT
       );
     `;
