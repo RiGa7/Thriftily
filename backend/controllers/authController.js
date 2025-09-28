@@ -2,7 +2,6 @@ import { sql } from "../config/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// REGISTER
 export const registerUser = async (req, res) => {
   const { username, name, email, password } = req.body;
 
@@ -22,7 +21,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-// LOGIN
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,7 +52,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-// LOGOUT
 export const logoutUser = (req, res) => {
   res.json({ message: "Logged out" });
 }; 
